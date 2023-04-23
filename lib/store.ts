@@ -1,18 +1,18 @@
 import { useState, useEffect } from "react";
 import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs";
 
-import { Note } from "@/types";
+import { Channel, Note } from "@/types";
 
 export const supabase = createBrowserSupabaseClient()
 
-export const useStore = (props: { channelId: number }) => {
+export const useStore = (props: { channelId: number }):{notes:Note[]| null,channels:Channel[]| null} => {
     const [channels, setChannels] = useState([])
-    const [notes, setNotes] = useState([])
+    const [notes, setNotes] = useState<Note[] | null>([])
     const [users] = useState(new Map)
     const [newNote, handleNewNote] = useState<Note | null>(null)
-    const [newChannel, handleNewChannel] = useState(null)
+    const [newChannel, handleNewChannel] = useState<Channel | null>(null)
     const [newOrUpdatedUser, handleNewOrUpdatedUser] = useState(null)
-    const [deletedChannel, handleDeletedChannel] = useState(null)
+    const [deletedChannel, handleDeletedChannel] = useState<Channel | null>(null)
     const [deletedNote, handleDeletedNote] = useState<Note | null>(null)
 
     useEffect(() => {
@@ -38,12 +38,12 @@ export const useStore = (props: { channelId: number }) => {
         .on(
           'postgres_changes',
           { event: 'INSERT', schema: 'public', table: 'channels' },
-          (payload) => handleNewChannel(payload.new)
+          (payload) => handleNewChannel(payload.new as Channel)
         )
         .on(
           'postgres_changes',
           { event: 'DELETE', schema: 'public', table: 'channels' },
-          (payload) => handleDeletedChannel(payload.old)
+          (payload) => handleDeletedChannel(payload.old as Channel)
         )
         .subscribe()
         // Cleanup on unmount
@@ -56,13 +56,18 @@ export const useStore = (props: { channelId: number }) => {
     // Update when the route changes
     useEffect(() => {
       if (props?.channelId > 0) {
-        fetchNotes(props.channelId, (messages) => {
-          messages.forEach((x) => users.set(x.user_id, x.author))
-          setMessages(messages)
+        fetchNotes(props.channelId, (notes: Note[]) => {
+          setNotes(notes)
         })
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [props.channelId])
+
+    return {
+      // We can export computed values here to map the authors to each message
+      notes: notes !== null ? notes : [],
+      channels: channels !== null ? channels : [],
+    }
 }
 
 export const fetchChannels = async (setState: Function) => {
@@ -77,7 +82,9 @@ export const fetchChannels = async (setState: Function) => {
 
 export const fetchNotes = async (channelId: number, setState: Function) => {
     try {
-        let { data } = await supabase.from('Notes').select('*')
+        let { data } = await supabase.from('Notes').select('*').eq('channel_id', channelId)
+        console.log(data);
+        if(setState) setState(data)
     } catch(error) {
         console.log('error', error)
     }
