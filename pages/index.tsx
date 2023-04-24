@@ -1,9 +1,11 @@
 import { useStore } from "@/lib/store"
 import { Note, Channel } from "@/types"
+import { useRouter } from "next/router";
 import { useState } from "react";
 
 export default function Home() {
   const [channel, setChannel] = useState('')
+  const router = useRouter()
 
   const handleChange = (e: React.FormEvent<HTMLInputElement>) => {
     setChannel(e.currentTarget.value)
@@ -11,7 +13,7 @@ export default function Home() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    console.log(channel);
+    router.push('channels/' + channel)
   }
   return (
     <main>

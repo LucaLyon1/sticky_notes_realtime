@@ -1,13 +1,13 @@
- export interface Note {
-    id: bigint,
-    created_at: string,
+export interface Note {
+    id?: bigint,
+    created_at?: string,
     title: string,
     text: string,
-    uid: string,
-    channel_id:number,
+    uid?: string,
+    channel_id: number,
 }
 
 export interface Channel {
-    id:bigint,
-    created_at:string,
+    id: bigint,
+    created_at: string,
 }
