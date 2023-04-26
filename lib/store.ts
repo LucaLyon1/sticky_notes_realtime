@@ -83,7 +83,6 @@ export const fetchChannels = async (setState: Function) => {
 export const fetchNotes = async (channelId: number, setState: Function) => {
   try {
     let { data } = await supabase.from('Notes').select('*').eq('channel_id', channelId)
-    console.log(data);
     if (setState) setState(data)
   } catch (error) {
     console.log('error', error)

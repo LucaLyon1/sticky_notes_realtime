@@ -1,13 +1,23 @@
 import { supabase, useStore } from "@/lib/store"
 import { Note } from "@/types"
 import { useRouter } from "next/router"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 const channelPage = () => {
     const [newNote, setNewNote] = useState<Note | null>(null)
     const router = useRouter()
     const { id } = router.query
     const { notes, channels } = useStore({ channelId: id ? +id : 1 })
+
+    useEffect(() => {
+        const check_channels = async () => {
+            const res = await supabase.from('channels').select('id').eq('id',id)
+            if (res.data?.length === 0) {
+                await supabase.from('channels').insert({id:id})
+            } 
+        }
+        if(id) check_channels()
+    })
 
 
     const addNote = () => {
@@ -18,24 +28,25 @@ const channelPage = () => {
         } as Note)
     }
     const handleTitle = (e: React.FormEvent<HTMLInputElement>) => {
-        if (newNote?.title && newNote.text) {
+        if (newNote) {
             setNewNote({ ...newNote, title: e.currentTarget.value })
         }
     }
     const handleText = (e: React.FormEvent<HTMLInputElement>) => {
-        if (newNote?.title && newNote.text) {
+        if (newNote) {
             setNewNote({ ...newNote, text: e.currentTarget.value })
         }
     }
     const postNote = async (e: React.MouseEvent<HTMLElement>) => {
         e.preventDefault()
-        await supabase.from('Notes').insert(newNote)
+        const res = await supabase.from('Notes').insert(newNote)
+        console.log(res)
     }
     return (
         <div className="flex h-screen">
             <div className="m-auto text-center">
-                {notes?.map((note) => {
-                    return <div className="bg-blue-400 p-4 rounded-md text-white my-2">
+                {notes?.map((note, i) => {
+                    return <div className="bg-blue-400 p-4 rounded-md text-white my-2" key={i}>
                         <h2>{note.title}</h2>
                         <p>{note.text}</p>
                         <p>{note.created_at && new Date(note.created_at).toLocaleDateString('en-GB')}</p>
