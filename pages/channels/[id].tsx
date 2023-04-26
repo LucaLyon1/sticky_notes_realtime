@@ -37,16 +37,22 @@ const channelPage = () => {
             setNewNote({ ...newNote, text: e.currentTarget.value })
         }
     }
+
     const postNote = async (e: React.MouseEvent<HTMLElement>) => {
         e.preventDefault()
-        const res = await supabase.from('Notes').insert(newNote)
-        console.log(res)
+        await supabase.from('Notes').insert(newNote)
     }
+
+    const deleteNote = async (id: bigint) => {
+        await supabase.from('Notes').delete().eq('id', id)
+    }
+
     return (
         <div className="flex h-screen">
             <div className="m-auto text-center">
                 {notes?.map((note, i) => {
                     return <div className="bg-blue-400 p-4 rounded-md text-white my-2" key={i}>
+                        <p onClick={() => deleteNote(note.id)} className="float-left cursor-pointer absolute">Delete</p>
                         <h2>{note.title}</h2>
                         <p>{note.text}</p>
                         <p>{note.created_at && new Date(note.created_at).toLocaleDateString('en-GB')}</p>

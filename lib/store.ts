@@ -16,6 +16,7 @@ export const useStore = (props: { channelId: number }): { notes: Note[] | null, 
   const [deletedNote, handleDeletedNote] = useState<Note | null>(null)
 
   useEffect(() => {
+    console.log('listening')
     // Fetch all existing channels
     fetchChannels(setChannels)
     //Set up listener for new and deleted notes
@@ -62,6 +63,22 @@ export const useStore = (props: { channelId: number }): { notes: Note[] | null, 
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.channelId])
+
+  //New note
+  useEffect(() => {
+    if (newNote && newNote.channel_id === Number(props.channelId)) {
+      const handleAsync = async () => {
+        if(notes) setNotes(notes.concat(newNote))
+      }
+      handleAsync()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [newNote])
+
+  //Deleted note
+  useEffect(() => {
+    if(deletedNote && notes) setNotes(notes.filter((note) => note.id !== deletedNote.id))
+  }, [deletedNote])
 
   return {
     // We can export computed values here to map the authors to each message

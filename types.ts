@@ -1,5 +1,5 @@
 export interface Note {
-    id?: bigint,
+    id: bigint,
     created_at?: string,
     title: string,
     text: string,
