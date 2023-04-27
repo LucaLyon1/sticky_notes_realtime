@@ -7,31 +7,34 @@ const channelPage = () => {
     const [newNote, setNewNote] = useState<Note | null>(null)
     const router = useRouter()
     const { id } = router.query
-    const { notes, channels } = useStore({ channelId: id ? +id : 1 })
+    const channelId = id
+    const { notes, channels } = useStore({ channelId: channelId ? +channelId : 1 })
 
     useEffect(() => {
         const check_channels = async () => {
-            const res = await supabase.from('channels').select('id').eq('id',id)
+            const res = await supabase.from('channels').select('id').eq('id', channelId)
             if (res.data?.length === 0) {
-                await supabase.from('channels').insert({id:id})
-            } 
+                await supabase.from('channels').insert({ id: channelId })
+                await postFirstNote()
+            }
         }
-        if(id) check_channels()
+        if (channelId) check_channels()
     })
-
 
     const addNote = () => {
         setNewNote({
             title: 'Title of your sticky note !',
             text: 'Description of your sticky note !',
-            channel_id: id ? +id : 1,
+            channel_id: channelId ? +channelId : 1,
         } as Note)
     }
+
     const handleTitle = (e: React.FormEvent<HTMLInputElement>) => {
         if (newNote) {
             setNewNote({ ...newNote, title: e.currentTarget.value })
         }
     }
+
     const handleText = (e: React.FormEvent<HTMLInputElement>) => {
         if (newNote) {
             setNewNote({ ...newNote, text: e.currentTarget.value })
@@ -43,9 +46,33 @@ const channelPage = () => {
         await supabase.from('Notes').insert(newNote)
     }
 
+    const postFirstNote = async () => {
+        await supabase.from('Notes').insert({
+            title: `First sticky note of channel ${channelId}`,
+            text: 'Create as much sticky note as you want here 📝',
+            channel_id: channelId ? +channelId : 1,
+        })
+    }
+
+    const deleteChannel = async () => {
+        await supabase.from('channels').delete().eq('id', channelId)
+    }
+
     const deleteNote = async (id: bigint) => {
         await supabase.from('Notes').delete().eq('id', id)
+        const res = await supabase.from('Notes').select('*', { count: 'exact' }).eq('channel_id', channelId)
+        console.log(res)
+        if (res.count === 0) {
+            deleteChannel()
+        }
     }
+
+    // redirect to public channel when current channel is deleted
+    useEffect(() => {
+        if (id && channels && channels?.length !== 0) if (!channels.some((channel) => channel.id as any === +id)) {
+            router.push('/channels/1')
+        }
+    }, [channels, id])
 
     return (
         <div className="flex h-screen">

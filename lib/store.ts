@@ -6,7 +6,7 @@ import { Channel, Note } from "@/types";
 export const supabase = createBrowserSupabaseClient()
 
 export const useStore = (props: { channelId: number }): { notes: Note[] | null, channels: Channel[] | null } => {
-  const [channels, setChannels] = useState([])
+  const [channels, setChannels] = useState<Channel[] | null>([])
   const [notes, setNotes] = useState<Note[] | null>([])
   const [users] = useState(new Map)
   const [newNote, handleNewNote] = useState<Note | null>(null)
@@ -16,7 +16,6 @@ export const useStore = (props: { channelId: number }): { notes: Note[] | null, 
   const [deletedNote, handleDeletedNote] = useState<Note | null>(null)
 
   useEffect(() => {
-    console.log('listening')
     // Fetch all existing channels
     fetchChannels(setChannels)
     //Set up listener for new and deleted notes
@@ -68,16 +67,21 @@ export const useStore = (props: { channelId: number }): { notes: Note[] | null, 
   useEffect(() => {
     if (newNote && newNote.channel_id === Number(props.channelId)) {
       const handleAsync = async () => {
-        if(notes) setNotes(notes.concat(newNote))
+        if (notes) setNotes(notes.concat(newNote))
       }
       handleAsync()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newNote])
+
+  // Deleted channel received from postgres
+  useEffect(() => {
+    if (deletedChannel && channels) setChannels(channels.filter((channel) => channel.id !== deletedChannel.id))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deletedChannel])
 
   //Deleted note
   useEffect(() => {
-    if(deletedNote && notes) setNotes(notes.filter((note) => note.id !== deletedNote.id))
+    if (deletedNote && notes) setNotes(notes.filter((note) => note.id !== deletedNote.id))
   }, [deletedNote])
 
   return {
