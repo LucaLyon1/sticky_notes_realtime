@@ -20,7 +20,7 @@ const channelPage = () => {
             }
         }
         if (channelId) check_channels()
-    })
+    }, [notes])
 
     const addNote = () => {
         setNewNote({

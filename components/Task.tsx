@@ -4,7 +4,6 @@ import { useEffect, useState } from "react"
 
 
 const Task = ({ note, channelId }: { note: Note, channelId: Number }) => {
-    const { notes, channels } = useStore({ channelId: channelId ? +channelId : 1 })
     const [dragging, setDragging] = useState(false)
     const [oldX, setOldX] = useState(0)
     const [oldY, setOldY] = useState(0)
