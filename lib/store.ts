@@ -80,15 +80,12 @@ export const useStore = (props: { channelId: number }): { notes: Note[] | null, 
   }, [newNote])
   //Move note
   useEffect(() => {
-    console.log('moved !')
     if (movedNote && movedNote.channel_id === Number(props.channelId)) {
       const handleAsync = async () => {
         if (notes) {
           const index = notes.findIndex((note) => note.id === movedNote.id)
           let newNotes = [...notes]
           newNotes[index] = movedNote
-          console.log(notes)
-          console.log(newNotes)
           setNotes(newNotes)
         }
       }

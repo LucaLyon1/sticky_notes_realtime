@@ -15,15 +15,14 @@ const Task = ({ note, channelId }: { note: Note, channelId: Number }) => {
         if (!task) {
             setTask(document.getElementById(String(note.id)))
         }
-        if (oldX === 0 && oldY === 0) {
-            if (note && task) {
-                task.style.left = note.pos_x + 'px'
-                task.style.top = note.pos_y + 'px'
-                setOldX(note.pos_x)
-                setOldY(note.pos_y)
-            }
+        if (note && task) {
+            task.style.left = note.pos_x + 'px'
+            task.style.top = note.pos_y + 'px'
+            setOldX(note.pos_x)
+            setOldY(note.pos_y)
         }
-    }, [task])
+    }, [task, note])
+
 
     const deleteChannel = async () => {
         await supabase.from('channels').delete().eq('id', channelId)
