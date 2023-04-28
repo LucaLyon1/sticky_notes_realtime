@@ -5,6 +5,8 @@ export interface Note {
     text: string,
     uid?: string,
     channel_id: number,
+    pos_x: number,
+    pos_y: number
 }
 
 export interface Channel {

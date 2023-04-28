@@ -9,8 +9,21 @@ const Task = ({ note, channelId }: { note: Note, channelId: Number }) => {
     const [oldY, setOldY] = useState(0)
     const [xpos, setXpos] = useState(0)
     const [ypos, setYpos] = useState(0)
-    const task = document.getElementById(String(note.id))
+    const [task, setTask] = useState<HTMLElement | null>(null)
 
+    useEffect(() => {
+        if (!task) {
+            setTask(document.getElementById(String(note.id)))
+        }
+        if (oldX === 0 && oldY === 0) {
+            if (note && task) {
+                task.style.left = note.pos_x + 'px'
+                task.style.top = note.pos_y + 'px'
+                setOldX(note.pos_x)
+                setOldY(note.pos_y)
+            }
+        }
+    }, [task])
 
     const deleteChannel = async () => {
         await supabase.from('channels').delete().eq('id', channelId)
@@ -20,7 +33,6 @@ const Task = ({ note, channelId }: { note: Note, channelId: Number }) => {
         setXpos(e.clientX)
         setYpos(e.clientY)
         setDragging(true)
-        console.log(oldX)
     }
     const handleMove = (e: React.MouseEvent) => {
         e.preventDefault()

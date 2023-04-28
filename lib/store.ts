@@ -10,6 +10,7 @@ export const useStore = (props: { channelId: number }): { notes: Note[] | null, 
   const [notes, setNotes] = useState<Note[] | null>([])
   const [users] = useState(new Map)
   const [newNote, handleNewNote] = useState<Note | null>(null)
+  const [movedNote, handleMovedNote] = useState<Note | null>(null)
   const [newChannel, handleNewChannel] = useState<Channel | null>(null)
   const [newOrUpdatedUser, handleNewOrUpdatedUser] = useState(null)
   const [deletedChannel, handleDeletedChannel] = useState<Channel | null>(null)
@@ -25,6 +26,11 @@ export const useStore = (props: { channelId: number }): { notes: Note[] | null, 
         schema: 'public',
         table: 'Notes'
       }, (payload) => handleNewNote(payload.new as Note))
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'Notes'
+      }, (payload) => handleMovedNote(payload.new as Note))
       .on('postgres_changes', {
         event: 'DELETE',
         schema: 'public',
@@ -72,6 +78,23 @@ export const useStore = (props: { channelId: number }): { notes: Note[] | null, 
       handleAsync()
     }
   }, [newNote])
+  //Move note
+  useEffect(() => {
+    console.log('moved !')
+    if (movedNote && movedNote.channel_id === Number(props.channelId)) {
+      const handleAsync = async () => {
+        if (notes) {
+          const index = notes.findIndex((note) => note.id === movedNote.id)
+          let newNotes = [...notes]
+          newNotes[index] = movedNote
+          console.log(notes)
+          console.log(newNotes)
+          setNotes(newNotes)
+        }
+      }
+      handleAsync()
+    }
+  }, [movedNote])
 
   // Deleted channel received from postgres
   useEffect(() => {

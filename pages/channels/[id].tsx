@@ -68,7 +68,7 @@ const channelPage = () => {
             {notes?.map((note, i) => {
                 return <Task note={note} channelId={channelId ? +channelId : 1} key={i}></Task>
             })}
-            <div className="m-auto text-center">
+            <div className="absolute right-8 bottom-8">
                 {newNote &&
                     <form className="bg-blue-400 p-4 rounded-md my-2">
                         <input className="border-2 border-blue-400 p-2 my-1 rounded-md" type="text" value={newNote.title} onChange={handleTitle} /><br />
